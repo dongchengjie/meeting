@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=no" />
+    <title>错误页面</title>
+    <link rel="stylesheet" href="../static/css/weui.min.css" th:href="@{/css/weui.min.css}">
+    <link rel="stylesheet" href="../static/css/xadmin.css" th:href="@{/css/xadmin.css}">
+    <style>
+        .qrcode {
+            font-size: 1em;
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            color: white;
+        }
+
+        a :hover {
+            color: #189F95 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="icon-box" style="margin: 100px auto;text-align: center">
+        <i class="weui-icon-info weui-icon_msg-primary" th:if="${error.errcode==0}"></i>
+        <i class="weui-icon-warn weui-icon_msg" th:if="${#strings.startsWith(error.errcode,'1')}"></i>
+        <i class="weui-icon-warn weui-icon_msg-primary" th:if="${#strings.startsWith(error.errcode,'2')}"></i>
+        <i class="weui-icon-info weui-icon_msg" th:if="${#strings.startsWith(error.errcode,'3')}"></i>
+    <div class="icon-box__ctn">
+        <h3 class="icon-box__title" th:if="${error.errcode==0}">错误</h3>
+        <h3 class="icon-box__title" th:if="${#strings.startsWith(error.errcode,'1')}">错误</h3>
+        <h3 class="icon-box__title" th:if="${#strings.startsWith(error.errcode,'2')}">警告</h3>
+        <h3 class="icon-box__title" th:if="${#strings.startsWith(error.errcode,'3')}">提示</h3>
+        <p class="icon-box__desc" th:text="${error.errmsg}">错误内容</p>
+    </div>
+    
+    <div style="width: 100%;text-align: center;margin-top: 30px;" th:if="${redirectUrl}!=null">
+        <button type="button" class="layui-btn">
+            <a href="#" th:href="${redirectUrl}" th:text="${redirectMsg}" class="qrcode">点击跳转</a>
+        </button>
+    </div>
+</div>
+</body>
+</html>

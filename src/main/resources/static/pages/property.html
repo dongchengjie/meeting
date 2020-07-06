@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>参数设置</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <link rel="stylesheet" href="../css/weui.min.css">
+    <script src="../js/vue.js" charset="utf-8"></script>
+    <script src="../js/jquery-3.4.1.js" charset="utf-8"></script>
+    <script src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <style>
+        .layui-input-block {
+            margin-left: 150px;
+        }
+
+        .layui-input-block span {
+            padding: 7px;
+            height: 23px;
+        }
+
+        .layui-input-block input {
+            padding: 0 0 0 8px;
+        }
+
+        .layui-form-item .layui-form-label {
+            width: 120px;
+            padding: 5px 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layui-fluid">
+        <div class="site-text site-block">
+            <form class="layui-form" action="" id="properties">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">会议室开放时间：</label>
+                    <div class="layui-input-block">
+                        <input style="width: 50px;float: left;" type="number" id="sh" required="" lay-verify="required"
+                            autocomplete="off" class="layui-input" placeholder="0-23" v-bind:value="sh|hourFilter">
+                        <span style="float: left;">:</span>
+                        <input style="width: 50px;float: left;" type="number" id="sm" required="" lay-verify="required"
+                            autocomplete="off" class="layui-input" placeholder="0-59" v-bind:value="sm|hourFilter">
+                        <span style="float: left;">-</span>
+                        <input style="width: 50px;float: left;" type="number" id="ch" required="" lay-verify="required"
+                            autocomplete="off" class="layui-input" placeholder="0-23" v-bind:value="ch|hourFilter">
+                        <span style="float: left;">:</span>
+                        <input style="width: 50px;float: left;" type="number" id="cm" required="" lay-verify="required"
+                            autocomplete="off" class="layui-input" placeholder="0-59" v-bind:value="cm|hourFilter">
+                        <span style="float: left;">（会议室处于非开放时间的时间段，会议室处于关闭状态，不可被预约）</span>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">自动审核预约：</label>
+                    <div class="layui-input-block" style="padding-top: 0;">
+                        <label for="check" class="weui-switch-cp" style="float: left;">
+                            <input id="check" style="float: left;" class="weui-switch-cp__input" type="checkbox"
+                                v-bind:checked="check">
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                        <span style="float: left;padding-top: 5px;">（启用后，将停用管理员审核，托管为系统自动审核。停用后，进入休眠，等待再次启用）</span>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">自动审核间隔：</label>
+                    <div class="layui-input-block">
+                        <input style="width: 50px;float: left;" type="number" id="checkInterval" required=""
+                            lay-verify="required" autocomplete="off" class="layui-input" v-bind:value="checkInterval">
+                        <span style="float: left;">分钟（每隔若干分钟，进行一次自动审核，减少系统开销。可根据审核响应度要求，自行调整）</span>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">定期清理过期记录：</label>
+                    <div class="layui-input-block" style="padding-top: 0;">
+                        <label for="clean" class="weui-switch-cp" style="float: left;">
+                            <input id="clean" style="float: left;" class="weui-switch-cp__input" type="checkbox"
+                                v-bind:checked="clean">
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                        <span style="float: left;padding-top: 5px;">（启用后，将根据清理周期，定期清理过期记录）</span>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">清理过期记录周期：</label>
+                    <div class="layui-input-block">
+                        <input style="width: 50px;float: left;" type="number" id="cleanInterval" required=""
+                            lay-verify="required" autocomplete="off" class="layui-input" v-bind:value="cleanInterval">
+                        <span style="float: left;">天（通过清理过期预约记录，从而减少记录总条数，提高会议室检索速度）</span>
+                    </div>
+                </div>
+            </form>
+            <div class="layui-form-item" style="position: fixed;bottom: 0;width: 100%;">
+                <div class="layui-input-block" style="margin: 0 35%;">
+                    <button style="width: 100px;" class="layui-btn" lay-submit="" id="save"
+                        lay-filter="formDemo">保存修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            var properties = new Vue({
+                el: '#properties',
+                data: {
+                    sh: 8,
+                    sm: 0,
+                    ch: 20,
+                    cm: 0,
+                    check: true,
+                    checkInterval: 2,
+                    clean: true,
+                    cleanInterval: 7
+                },
+                filters: {
+                    hourFilter: function (value) {
+                        if (value < 10) {
+                            return "0" + value;
+                        } else {
+                            return value;
+                        }
+                    }
+                }
+            });
+
+            $.ajax({
+                url: location.href.split("meeting")[0] + "meeting/server/properties",
+                type: "GET",
+                timeout: 5000,
+                success: function (data) {
+                    if (data.errcode === 0) {
+                        properties.sh = data.sh;
+                        properties.sm = data.sm;
+                        properties.ch = data.ch;
+                        properties.cm = data.cm;
+                        properties.check = data.check;
+                        properties.checkInterval = data.checkInterval;
+                        properties.clean = data.clean;
+                        properties.cleanInterval = data.cleanInterval;
+                    } else {
+                        layui.use('layer', function () {
+                            var layer = layui.layer;
+                            layer.msg(data.errmsg);
+                        });
+                    }
+                },
+                error: function (request, errorinfo) {
+                    if (errorinfo == "timeout") {
+                        layui.use('layer', function () {
+                            var layer = layui.layer;
+                            layer.msg("请求超时");
+                        });
+                    } else {
+                        layui.use('layer', function () {
+                            var layer = layui.layer;
+                            layer.msg("获取参数信息失败");
+                        });
+                    }
+                }
+            });
+            $('#save').click(function () {
+                var sh = Number($('#sh').val());
+                var sm = Number($('#sm').val());
+                var ch = Number($('#ch').val());
+                var cm = Number($('#cm').val());
+                var check = $('#check').is(':checked');
+                var checkInterval = Number($('#checkInterval').val());
+                var clean = $('#clean').is(':checked');
+                var cleanInterval = Number($('#cleanInterval').val());
+                $.ajax({
+                    url: location.href.split("meeting")[0] + "meeting/server/properties",
+                    type: "POST",
+                    timeout: 5000,
+                    data: {
+                        sh: sh,
+                        sm: sm,
+                        ch: ch,
+                        cm: cm,
+                        check: check,
+                        checkInterval: checkInterval,
+                        clean: clean,
+                        cleanInterval: cleanInterval
+                    },
+                    success: function (data) {
+                        if (data.errcode === 0) {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.msg(data.errmsg);
+                            });
+                        } else {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.msg(data.errmsg);
+                            });
+                        }
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function (request, errorinfo) {
+                        if (errorinfo == "timeout") {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.msg("请求超时");
+                            });
+                        } else {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.msg("获取参数信息失败");
+                            });
+                        }
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

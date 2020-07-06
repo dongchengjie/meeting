@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>我</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=no"/>
+    <script src="../js/jquery-3.4.1.js"></script>
+    <script src="../js/dialog.js"></script>
+    <script src="../js/my.js"></script>
+    <link rel="stylesheet" href="../css/weui.min.css">
+    <style type="text/css">
+        body {
+            line-height: 1.6;
+        }
+
+        a {
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+<div id="my_page" style="display: none">
+    <a href="edit_info.html">
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd" style="position: relative; margin-right: 10px;">
+                <img id="avatar" src="../images/defalt.png" style="width: 50px; display: block;border-radius: 5px">
+            </div>
+            <div class="weui-cell__bd">
+                <p id="name">姓名</p>
+                <p id="userid" style="font-size: 13px; color: #888;">用户名</p>
+            </div>
+        </div>
+    </a>
+    <a href="history.html">
+        <div class="weui-cell weui-cell_active weui-cell_access">
+            <div class="weui-cell__bd">
+                <span style="vertical-align: middle;">我的预约</span>
+            </div>
+            <div class="weui-cell__ft">查看我的预约记录</div>
+        </div>
+    </a>
+    <div class="weui-cell weui-cell_active weui-cell_access">
+        <div class="weui-cell__bd">
+            <span style="vertical-align: middle;">常见问题</span>
+        </div>
+        <div class="weui-cell__ft">常见问题和帮助</div>
+    </div>
+</div>
+<div class="weui-tabbar" style="position: fixed;right: 0;bottom: 0;left: 0;z-index: 2000">
+    <a href="index.html" class="weui-tabbar__item">
+            <span style="display: inline-block; position: relative;">
+                <img src="../images/appointment.png" alt="" class="weui-tabbar__icon">
+            </span>
+        <p class="weui-tabbar__label">会议室预约</p>
+    </a>
+    <a href="my.html" class="weui-tabbar__item  weui-bar__item_on">
+            <span style="display: inline-block; position: relative;">
+                <img src="../images/my_on.png" alt="" class="weui-tabbar__icon">
+            </span>
+        <p class="weui-tabbar__label" style="color: #4378BE;">我</p>
+    </a>
+</div>
+<!--弹窗-->
+<div id="dialogs">
+    <!--确认弹窗-->
+    <div id="confirm" class="js_dialog" style="opacity: 100; display: none;z-index: 2000">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div id="confirm_msg" class="weui-dialog__bd">确定信息</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+    <!--选择弹窗-->
+    <div id="yesorno" class="js_dialog" style="opacity: 100; display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong id="yesorno_title" class="weui-dialog__title">标题</strong></div>
+            <div id="yesorno_msg" class="weui-dialog__bd">内容</div>
+            <div class="weui-dialog__ft">
+                <a id="no_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                <a id="yes_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--完成气泡-->
+<div id="complete" style="opacity: 100; display: none;">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+        <p id="complete_msg" class="weui-toast__content">已完成</p>
+    </div>
+</div>
+<!--加载中气泡-->
+<div id="loading" style="opacity: 100; display: none">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-loading weui-icon_toast"></i>
+        <p id="loading_msg" class="weui-toast__content">数据加载中</p>
+    </div>
+</div>
+</body>
+
+</html>

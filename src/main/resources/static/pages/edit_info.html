@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>修改个人信息</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=no"/>
+    <script src="../js/jquery-3.4.1.js"></script>
+    <script src="../js/dialog.js"></script>
+    <script src="../js/weui.min.js"></script>
+    <script src="../js/edit_info.js"></script>
+    <link rel="stylesheet" href="../css/weui.min.css">
+    <style type="text/css">
+        .weui-label {
+            width: 50px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="edit_page" style="display: none">
+    <div class="weui-cells weui-cells_form" style="margin: 0;padding-right: 16px">
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd" style="position: relative; margin-right: 10px;">
+                <img id="avatar" src="../images/defalt.png" style="width: 50px; display: block;border-radius: 5px">
+            </div>
+            <input id="upload" name="upload" class="weui-uploader__input" type="file"
+                   accept="image/x-png,image/gif,image/jpeg,image/bmp">
+            <div class="weui-cell__bd">
+                <p style="font-size: 13px; color: #888;">点击修改头像(不超过3MB,图片上传后会压缩)</p>
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
+            <div class="weui-cell__bd">
+                <input id="name" class="weui-input" placeholder="姓名" readonly type="text">
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">账号</label></div>
+            <div class="weui-cell__bd">
+                <input id="userid" class="weui-input" placeholder="账号" type="text" readonly>
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">身份</label></div>
+            <div class="weui-cell__bd">
+                <input id="role" class="weui-input" placeholder="身份" readonly type="text">
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">性别</label></div>
+            <div class="weui-cell__bd">
+                <input id="gender" class="weui-input" placeholder="性别" readonly type="text">
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">年龄</label></div>
+            <div class="weui-cell__bd">
+                <input id="age" class="weui-input" placeholder="年龄" type="number">
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">电话</label></div>
+            <div class="weui-cell__bd">
+                <input id="phone" class="weui-input" placeholder="电话" type="number">
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_active">
+            <div class="weui-cell__hd"><label class="weui-label">邮箱</label></div>
+            <div class="weui-cell__bd">
+                <input id="email" class="weui-input" placeholder="邮箱" type="email">
+            </div>
+        </div>
+    </div>
+    <div class="weui-form__opr-area" style="margin: 20px 0">
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="save">保存修改</a>
+    </div>
+</div>
+<!--弹窗-->
+<div id="dialogs">
+    <!--确认弹窗-->
+    <div id="confirm" class="js_dialog" style="opacity: 100; display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div id="confirm_msg" class="weui-dialog__bd">确定信息</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+    <!--选择弹窗-->
+    <div id="yesorno" class="js_dialog" style="opacity: 100; display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong id="yesorno_title" class="weui-dialog__title">标题</strong></div>
+            <div id="yesorno_msg" class="weui-dialog__bd">内容</div>
+            <div class="weui-dialog__ft">
+                <a id="no_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                <a id="yes_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--完成气泡-->
+<div id="complete" style="opacity: 100; display: none;">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+        <p id="complete_msg" class="weui-toast__content">已完成</p>
+    </div>
+</div>
+<!--加载中气泡-->
+<div id="loading" style="opacity: 100; display: none">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-loading weui-icon_toast"></i>
+        <p id="loading_msg" class="weui-toast__content">数据加载中</p>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>预约详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <script src="../static/js/jquery-3.4.1.js" th:src="@{/js/jquery-3.4.1.js}"></script>
+    <script src="../static/js/vue.js" th:src="@{/js/vue.js}"></script>
+    <script src="../static/js/weui.min.js" th:src="@{/js/weui.min.js}"></script>
+    <script src="../static/js/dialog.js" th:src="@{/js/dialog.js}"></script>
+    <link rel="stylesheet" href="../static/css/weui.min.css" th:href="@{/css/weui.min.css}">
+    <link rel="stylesheet" href="../static/css/semantic.min.css" th:href="@{/css/semantic.min.css}">
+    <style>
+        .weui-cell {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>审核状态</p>
+        </div>
+        <div class="weui-cell__ft" th:if="${view.getStatusCode()==0}">已过期</div>
+        <div class="weui-cell__ft" th:if="${view.getStatusCode()==1}">已取消</div>
+        <div class="weui-cell__ft" th:if="${view.getStatusCode()==2}">待审核</div>
+        <div class="weui-cell__ft" th:if="${view.getStatusCode()==3}">已通过</div>
+        <div class="weui-cell__ft" th:if="${view.getStatusCode()==4}">被退回</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>审核信息</p>
+        </div>
+        <div class="weui-cell__ft" th:if="${view.getCheckInfo()}==''" th:text="无">审核信息</div>
+        <div class="weui-cell__ft" th:if="${view.getCheckInfo()}!=null" th:text="${view.getCheckInfo()}">审核信息</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>预约记录号</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getAppointId()}">预约记录号</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>预约提交时间</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${#dates.format(view.getHandTime(),'yyyy-MM-dd HH:mm:ss')}">提交时间</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>预约人姓名</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getName()}">预约人姓名</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>学号或职工号</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getUserid()}">学号或职工号</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>会议室地点</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getPlace()}">会议室名</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>开始时间</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${#dates.format(view.getStartTime(),'MM月dd日 HH:mm')}">预约时间</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>占用时长</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getDuration()}+'分钟'">占用时长</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>会议室用途</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getPurpose()}">会议室用途</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>参与人数</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getParticipants()}+'人'">参与人数</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>联系电话</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${view.getPhone()}">联系电话</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>备注信息</p>
+        </div>
+        <div class="weui-cell__ft" th:if="${view.getNote()}==''">无</div>
+        <div class="weui-cell__ft" th:if="${view.getNote()}!=null" th:text="${view.getNote()}">备注信息</div>
+    </div>
+    <div style="margin: 0 auto;text-align: center;width: 100%;position: fixed;bottom: 0;">
+        <a id="cancel" class="ui primary button" style="margin: 0;margin-bottom: 20px;min-width: 40%;" th:if="${view.getStatusCode()}==3">
+            取消预约
+        </a>
+    </div>
+    <script>
+        $('#cancel').click(function(){
+            yesorno_dialog('提示','是否取消该预约记录？');
+        });
+    </script>
+    <!--弹窗-->
+    <div id="dialogs">
+        <!--确认弹窗-->
+        <div id="confirm" class="js_dialog" style="opacity: 100; display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div id="confirm_msg" class="weui-dialog__bd">确定信息</div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--选择弹窗-->
+        <div id="yesorno" class="js_dialog" style="opacity: 100; display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd">
+                    <strong id="yesorno_title" class="weui-dialog__title">标题</strong>
+                </div>
+                <div id="yesorno_msg" class="weui-dialog__bd">内容</div>
+                <div class="weui-dialog__ft">
+                    <a id="no_btn" href="#" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a id="yes_btn" href="#" th:href="@{'/appointment/cancel/'+${view.getAppointId()}}"
+                        class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--完成气泡-->
+    <div id="complete" style="opacity: 100; display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p id="complete_msg" class="weui-toast__content">已完成</p>
+        </div>
+    </div>
+    <!--加载中气泡-->
+    <div id="loading" style="opacity: 100; display: none">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p id="loading_msg" class="weui-toast__content">数据加载中</p>
+        </div>
+    </div>
+</body>
+
+</html>

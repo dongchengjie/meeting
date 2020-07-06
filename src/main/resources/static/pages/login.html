@@ -1,0 +1,83 @@
+<!doctype html>
+<html class="x-admin-sm">
+
+<head>
+  <meta charset="UTF-8">
+  <title>后台登录</title>
+  <meta name="renderer" content="webkit|ie-comp|ie-stand">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="stylesheet" href="../css/font.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="../css/xadmin.css">
+  <script type="text/javascript" src="../js/jquery-3.4.1.js"></script>
+  <script src="../lib/layui/layui.js" charset="utf-8"></script>
+  <script src="../js/dialog.js" charset="utf-8"></script>
+  <style>
+    .qrcode {
+      font-size: 1.1em;
+      font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    }
+
+    a :hover {
+      color: #189F95 !important;
+    }
+  </style>
+</head>
+
+<body class="login-bg">
+
+  <div class="login layui-anim layui-anim-up">
+    <div class="message">会议室预约后台管理</div>
+    <div id="darkbannerwrap"></div>
+
+    <form method="post" class="layui-form">
+      <input id="username" name="username" style="font-size: 1.2em;" placeholder="用户名" type="text" lay-verify="required"
+        class="layui-input">
+      <hr class="hr15">
+      <input id="password" name="password" style="font-size: 1.2em;" lay-verify="required" placeholder="密码"
+        type="password" class="layui-input">
+      <hr class="hr15">
+      <input id="login" value="登录" lay-submit lay-filter="login" style="width:100%;font-size: 1.2em;" type="button">
+      <hr class="hr20">
+      <div style="width: 100%;text-align: center;">
+        <a href="/meeting/admin/qrcode" class="qrcode" onmouseover="this.style.color='#189F95'"
+          onmouseout="this.style.color='#333'">扫码登录</a>
+      </div>
+    </form>
+  </div>
+  <script>
+    //提交登录
+    $('#login').click(function () {
+      var username = $('#username').val();
+      var password = $('#password').val();
+      if (username.length == 0 || password.length == 0) {
+        alert("用户名或密码不能为空");
+        return;
+      }
+      //发送登录请求
+      $.ajax({
+        url: location.href.split("meeting")[0] + "meeting/login",
+        type: "POST",
+        data: {
+          username: username,
+          password: password
+        },
+        success: function (data) {
+          if (data.errcode === 0) {
+            location.href = "/meeting/admin";
+          } else {
+            layui.use('layer', function () {
+              var layer = layui.layer;
+              layer.msg(data.errmsg);
+            });
+          }
+        }
+      });
+    });
+  </script>
+  <!-- 底部结束 -->
+</body>
+
+</html>

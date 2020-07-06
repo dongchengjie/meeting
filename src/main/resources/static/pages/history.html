@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>预约记录</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=2.0, user-scalable=no" />
+    <script src="../js/jquery-3.4.1.js"></script>
+    <script src="../js/vue.js"></script>
+    <script src="../js/history.js"></script>
+    <script src="../js/dialog.js"></script>
+    <link rel="stylesheet" href="../css/weui.min.css">
+    <link rel="stylesheet" href="../css/semantic.min.css">
+    <style>
+        .weui-form-preview__bd {
+            padding: 0 10px;
+            line-height: 1.5;
+        }
+
+        .weui-form-preview {
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+
+        .weui-form-preview a {
+            border-top: 1px solid #F5F5F5;
+            padding: 5px 10px;
+            font-size: 1.1em;
+            line-height: 1.8;
+            letter-spacing: 2px;
+        }
+
+        .weui-navbar__item,
+        .weui-bar__item {
+            padding: 8px 0;
+            opacity: 0.8;
+        }
+
+        .weui-bar__item_on {
+            border-bottom: 2px solid #0099CC;
+        }
+
+        .weui-navbar {
+            margin-bottom: 10px;
+        }
+
+        .checking {
+            color: #0099CC;
+        }
+
+        .passed {
+            color: #008000;
+        }
+
+        .canceled {
+            color: #FF9966;
+        }
+
+        .rejected {
+            color: #CC3333;
+        }
+
+        .out_of_date {
+            color: #999966;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="weui-tab" style="background-color: 	#F5F5F5;">
+        <div class="weui-navbar">
+            <div id="checking" class="weui-navbar__item weui-bar__item_on">待审核</div>
+            <div id="passed" class="weui-navbar__item">已通过</div>
+            <div id="canceled" class="weui-navbar__item">已取消</div>
+            <div id="rejected" class="weui-navbar__item">被退回</div>
+            <div id="out_of_date" class="weui-navbar__item">已过期</div>
+        </div>
+
+        <div class="weui-form-preview" id="history" style="background-color:#F5F5F5;">
+            <div id="box" v-if="history.length===0"
+                style="width:100%;text-align: center;vertical-align: middle;padding: 200px 20%;">
+                <img src="../images/box.png">
+                <p style="font-size: 1.3em;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;font-weight:normal
+         ">暂无记录</p>
+            </div>
+            <div v-for="item in history" style="margin-bottom: 10px;background-color: white;">
+                <div class="weui-form-preview__hd" style="padding:0 10px;margin-bottom: 5px;">
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">审核状态</label>
+                        <em v-if="status_code==2" class="weui-form-preview__value checking"
+                            style="font-size: 1em;">审核中</em>
+                        <em v-if="status_code==3" class="weui-form-preview__value passed"
+                            style="font-size: 1em;">已通过</em>
+                        <em v-if="status_code==1" class="weui-form-preview__value canceled"
+                            style="font-size: 1em;">已取消</em>
+                        <em v-if="status_code==4" class="weui-form-preview__value rejected"
+                            style="font-size: 1em;">被退回</em>
+                        <em v-if="status_code==0" class="weui-form-preview__value out_of_date"
+                            style="font-size: 1em;">已过期</em>
+                    </div>
+                </div>
+                <div class="weui-form-preview__bd" style="font-size: 1.05em;">
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">记录号</label>
+                        <span class="weui-form-preview__value">{{item.appointId}}</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">会议室名</label>
+                        <span class="weui-form-preview__value">{{item.place}}</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">开始时间</label>
+                        <span class="weui-form-preview__value">{{item.startTime}}</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">占用时长</label>
+                        <span class="weui-form-preview__value">{{item.duration}}分钟</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">联系电话</label>
+                        <span class="weui-form-preview__value">{{item.phone}}</span>
+                    </div>
+                </div>
+                <a v-bind:href="'/meeting/history/detail/'+item.appointId"
+                    class="weui-form-preview__btn weui-form-preview__btn_primary">查看详情</a>
+            </div>
+
+        </div>
+    </div>
+    <!--弹窗-->
+    <div id="dialogs">
+        <!--确认弹窗-->
+        <div id="confirm" class="js_dialog" style="opacity: 100; display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div id="confirm_msg" class="weui-dialog__bd">确定信息</div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--选择弹窗-->
+        <div id="yesorno" class="js_dialog" style="opacity: 100; display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong id="yesorno_title" class="weui-dialog__title">标题</strong></div>
+                <div id="yesorno_msg" class="weui-dialog__bd">内容</div>
+                <div class="weui-dialog__ft">
+                    <a id="no_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a id="yes_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--完成气泡-->
+    <div id="complete" style="opacity: 100; display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p id="complete_msg" class="weui-toast__content">已完成</p>
+        </div>
+    </div>
+    <!--加载中气泡-->
+    <div id="loading" style="opacity: 100; display: none">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p id="loading_msg" class="weui-toast__content">数据加载中</p>
+        </div>
+    </div>
+</body>
+
+</html>

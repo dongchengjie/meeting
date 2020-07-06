@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+  <meta charset="UTF-8">
+  <title>管理员列表</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+  <link rel="stylesheet" href="../css/font.css">
+  <link rel="stylesheet" href="../css/xadmin.css">
+  <script src="../js/jquery-3.4.1.js" charset="utf-8"></script>
+  <script src="../lib/layui/layui.js" charset="utf-8"></script>
+  <script src="../js/xadmin.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <table class="layui-hide" id="admin_table" lay-filter="admin_table"></table>
+  <!--头部工具栏-->
+  <script type="text/html" id="toolbarTop">
+    <div class="layui-btn-container">
+      <button class="layui-btn layui-btn-danger" lay-event="batch_delete" style='font-size:14px'>
+        <i class="layui-icon layui-icon-delete"></i>批量删除
+      </button>
+      <button class="layui-btn layui-btn-normal" lay-event="add_admin" style='font-size:14px'>
+        <i class="layui-icon layui-icon-add-1"></i>添加管理员
+      </button>
+      <button class="layui-btn layui-btn-sm" lay-event="refresh" style='font-size:14px'>
+        <i class="layui-icon layui-icon-refresh"></i>刷 新
+      </button>
+    </div>
+  </script>
+  <!--行数据操作-->
+  <script type="text/html" id="barRight">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  </script>
+  <!--JS-->
+  <script>
+    layui.use('table', function () {
+      var table = layui.table;
+      table.render({
+        elem: '#admin_table',
+        url: '/meeting/admin/all',
+        toolbar: '#toolbarTop', //开启头部工具栏
+        title: '管理员数据表',
+        method: 'get', //请求方式
+        request: {
+          pageName: 'page', //分页：页码参数名
+          limitName: 'size' //分页：页大小参数名
+        },
+        cols: [
+          [{
+              type: 'checkbox',
+              fixed: 'left'
+            }, {
+              field: 'id',
+              width: 80,
+              title: 'ID',
+              sort: true
+            },
+            {
+              field: 'username',
+              title: '用户名',
+              sort: true
+            },
+            {
+              field: 'password',
+              title: '密码',
+            }, {
+              field: 'privileged',
+              title: '管理员身份',
+              align: 'center',
+              sort: true
+            },
+            {
+              field: 'createTime',
+              title: '创建时间',
+              align: 'center',
+              sort: true
+            }, {
+              fixed: 'right',
+              title: '操作',
+              toolbar: '#barRight',
+              align: 'center',
+              width: 150
+            }
+          ]
+        ],
+        done: function (res, curr, count) { //数据转义
+          $("[data-field='privileged']").children().each(function () {
+            if ($(this).text() == '0') {
+              $(this).text('普通管理员');
+            } else if ($(this).text() == '1') {
+              $(this).text('超级管理员');
+            }
+          });
+        },
+        page: true //开启分页
+      });
+
+      //头部工具栏事件
+      table.on('toolbar(admin_table)', function (obj) {
+        var checkStatus = table.checkStatus(obj.config.id);
+        switch (obj.event) {
+          case 'batch_delete':
+            var data = checkStatus.data;
+            var ids = [];
+            //挑选出选择的id
+            data.forEach((item) => {
+              ids.push(item.id);
+            });
+            if (data.length > 0) {
+              layer.confirm('确定删除这' + data.length + '个管理员？', function (index) {
+                $.ajax({
+                  url: location.href.split("meeting")[0] + "meeting/admin/delete",
+                  type: "POST",
+                  traditional: true,
+                  data: {
+                    ids: ids.map(Number)
+                  },
+                  success: function (data) {
+                    if (data.errcode === 0) {
+                      layer.close(index);
+                      setTimeout(function () {
+                        location.reload();
+                      }, 1000)
+                    }
+                    layui.use('layer', function () {
+                      var layer = layui.layer;
+                      layer.msg(data.errmsg);
+                    });
+                  }
+                });
+                layer.close(index);
+              });
+            }
+            break;
+          case 'add_admin':
+            xadmin.open('添加管理员', './admin-add.html', 600, 400);
+            break;
+          case 'refresh':
+            location.reload();
+            break;
+        };
+      });
+
+      //行数据操作事件
+      table.on('tool(admin_table)', function (obj) {
+        var data = obj.data;
+        if (obj.event === 'del') {
+          layer.confirm('确定删除？', function (index) {
+            var ids = [];
+            ids.push(data.id);
+            $.ajax({
+              url: location.href.split("meeting")[0] + "meeting/admin/delete",
+              type: "POST",
+              traditional: true,
+              data: {
+                ids: ids.map(Number)
+              },
+              success: function (data) {
+                if (data.errcode === 0) {
+                  layer.close(index);
+                  setTimeout(function () {
+                    location.reload();
+                  }, 1000)
+                }
+                layui.use('layer', function () {
+                  var layer = layui.layer;
+                  layer.msg(data.errmsg);
+                });
+              }
+            });
+            layer.close(index);
+          });
+        } else if (obj.event === 'edit') {
+          xadmin.open('管理员编辑', '/meeting/admin/edit/' + data.id, 600, 400);
+        }
+      });
+      //排序监听
+      table.on('sort(admin_table)', function (obj) {
+        table.reload('admin_table', {
+          initSort: obj
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

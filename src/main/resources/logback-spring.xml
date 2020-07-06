@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 根节点 , logback的全局配置 , 包含3个属性
+    scan : 当文件发生变更时是否重载 , 默认值ture
+    scanPeriod : 监测文件的间隔时间 , 即每隔多少时间扫描一次配置文件 仅当scan=true时生效. 默认间隔时间1min , 如果不写单位默认是毫秒;
+    debug : 是否为debug模式 , 为true时会打印出logack内部日志 , 便于查看logback实时信息 . 默认值false
+ -->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <!-- 上下文名称 , 每个logger都关联到上下文 , 默认值为default . 设置之后不可动态修改 -->
+    <contextName>logback</contextName>
+
+    <!-- 定义变量 , 在配置文件其他地方可通过${变量名}访问 -->
+    <property name="appName" value="meeting"/>
+
+    <!-- 内部变量 , 获取时间戳字符串 . key为变量名 , datePattern为解析的日期字符串格式 , 与SimpleDateFormat格式相同 -->
+    <timestamp key="time" datePattern="yyyyMMdd HHmmss"/>
+
+    <!-- 日志输出组件 有两个必须的属性
+        name : 当前appender的名称 , 在logger组件中相关联
+        class : 日志的输出控制类 , 通过class将日志输出到控制台/文件/远程socket服务器/数据库等
+            不同的class有着不同的配置
+    -->
+    <!-- ConsoleAppender , 将日志输出到控制台 . 有encoder和target两个子节点(新版本有filter子节点 , 在下文中详细说明) -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 子节点encoder , 指定日志输出的格式 , 具体格式配置见下方表格 -->
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+
+        <!-- 子节点target , 日志输出的对象 System.out 或 System.err -->
+        <target></target>
+    </appender>
+    <!-- FileAppender , 将日志输出到文件 . 有file/append/encoder/prudent四个子节点(新版本有filter子节点 , 在下文中详细说明) -->
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <!-- 子节点file , 输出的目标文件名 , 父级目录不存在会自动创建 . 无默认值 -->
+        <springProfile name="dev">
+            <file>${appName}.log</file>
+        </springProfile>
+        <springProfile name="production">
+            <file>../webapps/${appName}/WEB-INF/logs/${appName}.log</file>
+        </springProfile>
+        <!-- 子节点append , 是否为追加模式 . 为true则日志被追加到文件末尾 , false则清空现文件重新写入 . 默认值true -->
+        <append>true</append>
+
+        <!-- 子节点encoder , 指定日志输出的格式 -->
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+
+        <!-- 子节点produent , 是否为安全写入模式 . 为ture则日志会被安全的写入文件 , 即使其他FileAppender同时做写入操作 , 效率低 . 默认值false -->
+        <prudent>true</prudent>
+    </appender>
+
+    <!-- RollingFileAppender , 将日志动态输出到文件 . 通过clas指定策略 ,  符合某个策略时 , 会自动创建新日志文件并输出(按日期/大小等) . 有file/append/rollingPolicy等几个节点 -->
+    <!-- RollingFileAppender详细配置参见下文 -->
+
+    <!-- logger 日志返回/级别及输出目标配置 有必填属性name和选填属性level/additivity , 一个appender-ref 子节点(可配置1个或多个)
+        name : 指定遵守该logger约束的一个包或具体的某个类
+        level : 日志级别 ,有以下值TRACE, DEBUG, INFO, WARN, ERROR, ALL, OFF , 不区分大小写
+        additivity : 是否向上级logger传递日志信息 , 默认为ture . (如果上级logger也输出日志 , 则会输出两份 . 所以通常情况下配置为false)
+     -->
+    <logger name="org.springframework" level="INFO" additivity="false">
+        <appender-ref ref="console"/><!-- 输出到相关联的appender中 -->
+        <appender-ref ref="file"/>
+    </logger>
+    <!-- 更多常用的三方框架logger配置见下文 -->
+
+    <!-- root本身也是一个logger节点(相当于name="root"的logger) , 但仅能配置一个 , 是所有logger的父级(可以理解为Java中的Object) , 只有一个level属性, 默认值DEBUG -->
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </root>
+</configuration>

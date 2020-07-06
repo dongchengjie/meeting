@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <script src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/jquery-3.4.1.js"></script>
+    <script type="text/javascript" src="../js/vue.js"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body " id="welcome">
+                        <blockquote class="layui-elem-quote">
+                            <span class="x-admin-backlog" v-cloak>欢迎管理员：</span>
+                            <span class="x-red">{{username}}</span> 
+                            <span class="x-admin-backlog" v-cloak>当前时间:{{date|formatTimer}}</span>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card" id="statistics">
+                    <div class="layui-card-header">数据统计</div>
+                    <div class="layui-card-body ">
+                        <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                            <li class="layui-col-md2 layui-col-xs6">
+                                <a href="javascript:;" class="x-admin-backlog-body">
+                                    <h3>总用户数</h3>
+                                    <p>
+                                        <cite v-cloak>{{totalUser}}</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md2 layui-col-xs6">
+                                <a href="javascript:;" class="x-admin-backlog-body">
+                                    <h3>累计预约数</h3>
+                                    <p>
+                                        <cite v-cloak>{{totalAppointment}}</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md2 layui-col-xs6">
+                                <a href="javascript:;" class="x-admin-backlog-body">
+                                    <h3>今日预约数</h3>
+                                    <p>
+                                        <cite v-cloak>{{totalToday}}</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md2 layui-col-xs6">
+                                <a href="javascript:;" class="x-admin-backlog-body">
+                                    <h3>自动审核</h3>
+                                    <p>
+                                        <cite v-if="autoCheck==true" v-cloak
+                                            style="font-size: 1.4em;font-weight:550;">运行中</cite>
+                                        <cite v-if="autoCheck==false" v-cloak
+                                            style="font-size: 1.4em;font-weight:550;">休眠中</cite>
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md2 layui-col-xs6">
+                                <a href="javascript:;" class="x-admin-backlog-body">
+                                    <h3>自动清理过期记录</h3>
+                                    <p>
+                                        <cite v-if="autoClean==true" v-cloak
+                                            style="font-size: 1.4em;font-weight:550;">运行中</cite>
+                                        <cite v-if="autoClean==false" v-cloak
+                                            style="font-size: 1.4em;font-weight:550;">休眠中</cite>
+                                    </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">系统信息</div>
+                    <div class="layui-card-body ">
+                        <table class="layui-table">
+                            <tbody>
+                                <tr>
+                                    <th>服务器地址</th>
+                                    <td>enterprise.viphk.ngrok.org/meeting</td>
+                                </tr>
+                                <tr>
+                                    <th>操作系统</th>
+                                    <td>Windows 10</td>
+                                </tr>
+                                <tr>
+                                    <th>Web容器</th>
+                                    <td>Tomcat 8.5.41</td>
+                                </tr>
+                                <tr>
+                                    <th>MYSQL版本</th>
+                                    <td>8.0.18</td>
+                                </tr>
+                                <tr>
+                                    <th>上传附件限制</th>
+                                    <td>3M</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            var statistics = new Vue({
+                el: '#statistics',
+                data: {
+                    totalUser: 0,
+                    totalAppointment: 0,
+                    totalToday: 0,
+                    autoCheck: true,
+                    autoClean: true
+                }
+            });
+            var welcome = new Vue({
+                el: '#welcome',
+                data: {
+                    username: '',
+                    date: new Date()
+                },
+                filters: {
+                    formatTimer: function (value) {
+                        let date = new Date(value);
+                        let y = date.getFullYear();
+                        let MM = date.getMonth() + 1;
+                        MM = MM < 10 ? "0" + MM : MM;
+                        let d = date.getDate();
+                        d = d < 10 ? "0" + d : d;
+                        let h = date.getHours();
+                        h = h < 10 ? "0" + h : h;
+                        let m = date.getMinutes();
+                        m = m < 10 ? "0" + m : m;
+                        let s = date.getSeconds();
+                        s = s < 10 ? "0" + s : s;
+                        return y + "-" + MM + "-" + d + " " + h + ":" + m + ":" + s;
+                    }
+                },
+                mounted() {
+                    var _this = this; //声明一个变量指向vue实例this,保证作用域一致
+                    this.timer = setInterval(function () {
+                        _this.date = new Date(); //修改数据date
+                    }, 1000);
+                },
+                beforeDestroy() {
+                    if (this.timer) {
+                        clearInterval(this.timer); //在vue实例销毁钱，清除我们的定时器
+                    }
+                }
+            });
+            //先主动获取一次，之后每5秒刷新一次
+            getServerProperties();
+            var refresh = setInterval(function () {
+                getServerProperties();
+            }, 5000);
+            //请求服务器参数
+            function getServerProperties() {
+                $.ajax({
+                    url: location.href.split("meeting")[0] + "meeting/server",
+                    type: "GET",
+                    success: function (data) {
+                        if (data.errcode === 0) {
+                            welcome.username = data.username;
+                            statistics.totalUser = data.totalUser;
+                            statistics.totalAppointment = data.totalAppointment;
+                            statistics.totalToday = data.totalToday;
+                            statistics.autoCheck = data.autoCheck;
+                            statistics.autoClean = data.autoClean;
+                        } else {
+                            layui.use('layer', function () {
+                                var layer = layui.layer;
+                                layer.msg(data.errmsg);
+                                xadmin.father_reload();
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        layui.use('layer', function () {
+                            var layer = layui.layer;
+                            layer.msg("连接服务器失败,请刷新重试");
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html class="x-admin-sm" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台登录</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link rel="stylesheet" href="../static/css/font.css" th:href="@{/css/font.css}">
+    <link rel="stylesheet" href="../static/css/xadmin.css" th:href="@{/css/xadmin.css}">
+    <script src="../static/js/jquery-3.4.1.js" th:src="@{/js/jquery-3.4.1.js}"></script>
+    <script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <script>
+        // 是否开启刷新记忆tab功能
+        var is_remember = true;
+    </script>
+</head>
+
+<body class="index">
+    <!-- 顶部开始 -->
+    <div class="container">
+        <div class="logo">
+            <a href="/meeting/admin">会议室预约后台管理</a></div>
+        <div class="left_open">
+            <a><i title="展开左侧栏" class="iconfont">&#xe699;</i></a>
+        </div>
+        <ul class="layui-nav right" lay-filter="">
+            <li class="layui-nav-item">
+                <a href="javascript:;" th:text="${admin.getUsername()}">用户名</a>
+                <dl class="layui-nav-child">
+                    <dd>
+                        <a href="javascript:;" onclick="updatePassword()">修改密码</a></dd>
+                    <!-- 二级菜单 -->
+                    <dd>
+                        <a href="/meeting/logout">退出登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <!-- 顶部结束 -->
+    <!-- 中部开始 -->
+    <!-- 左侧菜单开始 -->
+    <div class="left-nav">
+        <div id="side-nav">
+            <ul id="nav">
+                <li>
+                    <a onclick="xadmin.add_tab('用户管理','/meeting/pages/user-list.html')">
+                        <i class="left-nav-li layui-icon layui-icon-user" lay-tips="用户管理"></i>
+                        <cite>用户管理</cite>
+                    </a>
+                </li>
+                <li th:if="${admin.getPrivileged()==1}">
+                    <a onclick="xadmin.add_tab('管理员管理','/meeting/pages/admin-list.html')">
+                        <i class="left-nav-li layui-icon layui-icon-key" lay-tips="管理员管理"></i>
+                        <cite>管理员管理</cite>
+                    </a>
+                </li>
+                <li th:if="${admin.getPrivileged()==1}">
+                    <a onclick="xadmin.add_tab('会议室管理','/meeting/pages/rooms.html')">
+                        <i class="left-nav-li layui-icon layui-icon-home" lay-tips="会议室管理"></i>
+                        <cite>会议室管理</cite>
+                    </a>
+                </li>
+                <li>
+                    <a onclick="xadmin.add_tab('预约列表','/meeting/pages/check-list.html')">
+                        <i class="left-nav-li layui-icon layui-icon-survey" lay-tips="预约审核"></i>
+                        <cite>预约审核</cite>
+                    </a>
+                </li>
+                <li th:if="${admin.getPrivileged()==1}">
+                    <a onclick="xadmin.add_tab('参数设置','/meeting/pages/property.html')">
+                        <i class="left-nav-li layui-icon layui-icon-set" lay-tips="参数设置"></i>
+                        <cite>参数设置</cite>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- <div class="x-slide_left"></div> -->
+    <!-- 左侧菜单结束 -->
+    <!-- 右侧主体开始 -->
+    <div class="page-content">
+        <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+            <ul class="layui-tab-title">
+                <li class="home">
+                    <i class="layui-icon">&#xe68e;</i>欢迎页面
+                </li>
+            </ul>
+            <div class="layui-unselect layui-form-select layui-form-selected" id="tab_right">
+                <dl>
+                    <dd data-type="this">关闭当前</dd>
+                    <dd data-type="other">关闭其它</dd>
+                    <dd data-type="all">关闭全部</dd>
+                </dl>
+            </div>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe src="/meeting/pages/welcome.html" frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+                </div>
+            </div>
+            <div id="tab_show"></div>
+        </div>
+    </div>
+    <!-- 右侧主体结束 -->
+    <!-- 中部结束 -->
+    <script>
+        function updatePassword() {
+            xadmin.open('修改密码', '/meeting/pages/update_password.html', 600, 400);
+        }
+        $(function () {
+
+        });
+    </script>
+</body>
+
+</html>

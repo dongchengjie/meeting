@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+  <meta charset="UTF-8">
+  <title>管理员列表</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+  <link rel="stylesheet" href="../css/font.css">
+  <link rel="stylesheet" href="../css/xadmin.css">
+  <script src="../js/jquery-3.4.1.js" charset="utf-8"></script>
+  <script src="../lib/layui/layui.js" charset="utf-8"></script>
+  <script src="../js/vue.js" charset="utf-8"></script>
+  <script src="../js/xadmin.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <div id="container">
+    <table class="layui-hide" id="check_table" lay-filter="check_table" v-if="autoCheck==false"></table>
+    <div class="layui-container" v-if="autoCheck===true" @click="reload()">
+      <div class="fly-panel">
+        <div class="fly-none">
+          <h2><i class="layui-icon layui-icon-about"></i></h2>
+          <p>预约自动审核<span style="color: green;">运行中</span>，为防止冲突，请将自动审核<span
+              style="color: orange;">休眠</span>，点击界面可<a href="" style="color: red;">刷新</a>状态</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--头部工具栏-->
+  <script type="text/html" id="toolbarTop">
+    <div class="layui-btn-container">
+      <button class="layui-btn layui-btn-danger" lay-event="batch_reject" style='font-size:14px'>
+        <i class="layui-icon layui-icon-close"></i>批量退回
+      </button>
+      <button class="layui-btn layui-btn-normal" lay-event="batch_approve" style='font-size:14px'>
+        <i class="layui-icon layui-icon-auz"></i>批量通过
+      </button>
+      <button class="layui-btn layui-btn-sm" lay-event="refresh" style='font-size:14px'>
+        <i class="layui-icon layui-icon-refresh"></i>刷 新
+      </button>
+    </div>
+  </script>
+  <!--JS-->
+  <script>
+    var container = new Vue({
+      el: '#container',
+      data: {
+        autoCheck: true
+      },
+      methods: {
+        reload() {
+          location.reload();
+        }
+      }
+    });
+    //读取自动审核状态
+    $.ajax({
+      url: location.href.split("meeting")[0] + "meeting/server",
+      type: "GET",
+      success: function (data) {
+        if (data.errcode === 0) {
+          container.autoCheck = data.autoCheck;
+        } else {
+          layui.use('layer', function () {
+            var layer = layui.layer;
+            layer.msg(data.errmsg);
+            xadmin.father_reload();
+          });
+        }
+        render();//渲染表格
+      },
+      error: function (data) {
+        layui.use('layer', function () {
+          var layer = layui.layer;
+          layer.msg("连接服务器失败,请刷新重试");
+        });
+      }
+    });
+
+    function render() {
+      layui.use(['table', 'layer'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        table.render({
+          elem: '#check_table',
+          url: '/meeting/check/all',
+          toolbar: '#toolbarTop', //开启头部工具栏
+          title: '管理员数据表',
+          method: 'get', //请求方式
+          request: {
+            pageName: 'page', //分页：页码参数名
+            limitName: 'size' //分页：页大小参数名
+          },
+          cols: [
+            [{
+              type: 'checkbox',
+              fixed: 'left'
+            }, {
+              field: 'appointId',
+              width: 100,
+              title: '预约号',
+              align: 'center',
+              sort: true
+            }, {
+              field: 'userid',
+              title: 'userid',
+              align: 'center',
+              width: 100,
+              sort: true
+            }, {
+              field: 'name',
+              title: '姓名',
+              align: 'center',
+              width: 100,
+              sort: true
+            }, {
+              field: 'place',
+              title: '会议室地点',
+              width: 120,
+              align: 'center',
+              sort: true
+            }, {
+              field: 'purpose',
+              title: '预约目的',
+              align: 'center',
+              width: 160,
+            }, {
+              field: 'size',
+              title: '会议室容量',
+              width: 100,
+              align: 'center',
+            }, {
+              field: 'participants',
+              title: '参与人数',
+              align: 'center',
+              width: 100,
+              sort: true
+            }, {
+              field: 'phone',
+              title: '联系电话',
+              align: 'center',
+              width: 120,
+              sort: true
+            }, {
+              field: 'startTime',
+              title: '开始时间',
+              align: 'center',
+              width: 150,
+              sort: true
+            }, {
+              field: 'duration',
+              title: '占用时长',
+              align: 'center',
+              width: 100,
+              sort: true,
+              templet: function (d) {
+                return d.duration + '分钟';
+              }
+            }, {
+              field: 'handTime',
+              title: '提交时间',
+              align: 'center',
+              width: 150,
+              sort: true
+            }, {
+              field: 'note',
+              title: '备注信息',
+              align: 'center',
+              width: 240
+            }]
+          ],
+          done: function (res, curr, count) { //数据转义
+            $("[data-field='note']").children().each(function () {
+              if ($(this).text() == '') {
+                $(this).text('无');
+              }
+            });
+          },
+          page: true //开启分页
+        });
+
+        //头部工具栏事件
+        table.on('toolbar(check_table)', function (obj) {
+          var checkStatus = table.checkStatus(obj.config.id);
+          var data = checkStatus.data;
+          var ids = [];
+          //挑选出选择的id
+          data.forEach((item) => {
+            ids.push(item.appointId);
+          });
+          switch (obj.event) {
+            case 'batch_reject':
+              if (data.length > 0) {
+                layer.prompt({
+                  formType: 2,
+                  value: '',
+                  title: '请输入退回理由（必填）',
+                  area: ['400px', '250px'] //自定义文本域宽高
+                }, function (value, index, elem) {
+                  checkInfo = value;
+                  $.ajax({
+                    url: location.href.split("meeting")[0] + "meeting/check/reject",
+                    type: "POST",
+                    traditional: true,
+                    data: {
+                      ais: ids.map(Number),
+                      checkInfo: checkInfo
+                    },
+                    success: function (data) {
+                      if (data.errcode === 0) {
+                        layer.close(index);
+                      }
+                      layer.msg(data.errmsg);
+                      layer.close(index);
+                      setTimeout(function () {
+                        location.reload();
+                      }, 1000)
+                    }
+                  });
+                  layer.close(index);
+                });
+              }
+              break;
+            case 'batch_approve':
+              if (data.length > 0) {
+                layer.confirm('确定通过这' + data.length + '条预约请求？', function (index) {
+                  $.ajax({
+                    url: location.href.split("meeting")[0] + "meeting/check/approve",
+                    type: "POST",
+                    traditional: true,
+                    data: {
+                      ais: ids.map(Number)
+                    },
+                    success: function (data) {
+                      if (data.errcode === 0) {
+                        layer.close(index);
+                      }
+                      layui.use('layer', function () {
+                        var layer = layui.layer;
+                        layer.msg(data.errmsg);
+                      });
+                      setTimeout(function () {
+                        location.reload();
+                      }, 1000)
+                    }
+                  });
+                  layer.close(index);
+                });
+              }
+              break;
+            case 'refresh':
+              location.reload();
+              break;
+          };
+        });
+        //排序监听
+        table.on('sort(check_table)', function (obj) {
+          table.reload('check_table', {
+            initSort: obj
+          });
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

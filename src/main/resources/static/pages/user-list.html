@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+  <meta charset="UTF-8">
+  <title>用户列表</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+  <link rel="stylesheet" href="../css/font.css">
+  <link rel="stylesheet" href="../css/xadmin.css">
+  <script src="../js/jquery-3.4.1.js" charset="utf-8"></script>
+  <script src="../lib/layui/layui.js" charset="utf-8"></script>
+  <script src="../js/xadmin.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <table class="layui-hide" id="user_table" lay-filter="user_table"></table>
+  <!--头部工具栏-->
+  <script type="text/html" id="toolbarTop">
+    <div class="layui-btn-container">
+      <button class="layui-btn layui-btn-normal" lay-event="add_admin" style='font-size:14px'>
+        <i class="layui-icon layui-icon-flag"></i>设为普通管理员
+      </button>
+      <button class="layui-btn layui-btn-danger" lay-event="add_super" style='font-size:14px'>
+        <i class="layui-icon layui-icon-key"></i>设为超级管理员
+      </button>
+      <button class="layui-btn layui-btn-sm" lay-event="refresh" style='font-size:14px'>
+        <i class="layui-icon layui-icon-refresh"></i>刷 新
+      </button>
+    </div>
+  </script>
+  <!--JS-->
+  <script>
+    layui.use('table', function () {
+      var table = layui.table;
+      table.render({
+        elem: '#user_table',
+        url: '/meeting/profile/all',
+        toolbar: '#toolbarTop', //开启头部工具栏
+        title: '管理员数据表',
+        method: 'get', //请求方式
+        request: {
+          pageName: 'page', //分页：页码参数名
+          limitName: 'size' //分页：页大小参数名
+        },
+        cols: [
+          [{
+              type: 'checkbox',
+              fixed: 'left',
+            },
+            {
+              field: 'avatar',
+              width: 80,
+              height: 80,
+              title: '头像',
+              align: 'center',
+              templet: function (d) {
+                return "<a href='" + d.avatar +
+                  "' target='_blank' title='点击查看大图'><img class='avatar' src='" + d.avatar +
+                  "' alt='' style='height:30px;width:30px;display:inline-block;overflow: hidden;'></a>"
+              }
+            },
+            {
+              field: 'name',
+              title: '姓名',
+              width: 80,
+              align: 'center',
+              sort: true
+            }, {
+              field: 'userid',
+              title: 'userid',
+              align: 'center',
+              width: 100,
+              sort: true
+            }, {
+              field: 'role',
+              title: '身份',
+              width: 80,
+              align: 'center',
+              sort: true
+            }, {
+              field: 'age',
+              title: '年龄',
+              align: 'center',
+              width: 80,
+              sort: true
+            }, {
+              field: 'gender',
+              title: '性别',
+              sort: true,
+              width: 80,
+              align: 'center'
+            }, {
+              field: 'phone',
+              title: '手机号码',
+              align: 'center',
+              width: 160,
+              sort: true
+            }, {
+              field: 'email',
+              title: '电子邮箱',
+              align: 'center',
+              width: 160,
+              sort: true
+            }, {
+              field: 'createTime',
+              title: '创建时间',
+              align: 'center',
+              sort: true,
+            }
+          ]
+        ],
+        done: function (res, curr, count) { //数据转义
+          $("[data-field='role']").children().each(function () {
+            if ($(this).text() == '1') {
+              $(this).text('学生');
+            } else if ($(this).text() == '2') {
+              $(this).text('老师');
+            }
+          });
+          $("[data-field='age']").children().each(function () {
+            if (Number($(this).text()) == 0) {
+              $(this).text('未设置');
+            }
+          });
+          $("[data-field='gender']").children().each(function () {
+            if ($(this).text() == '0') {
+              $(this).text('未设置');
+            } else if ($(this).text() == '1') {
+              $(this).text('男');
+            } else if ($(this).text() == '2') {
+              $(this).text('女');
+            }
+          });
+          $("[data-field='email']").children().each(function () {
+            if ($(this).text() == '') {
+              $(this).text('未设置');
+            }
+          });
+        },
+        page: true //开启分页
+      });
+
+      //头部工具栏事件
+      table.on('toolbar(user_table)', function (obj) {
+        var checkStatus = table.checkStatus(obj.config.id);
+        switch (obj.event) {
+          case 'add_admin':
+          case 'add_super':
+            var data = checkStatus.data;
+            var userids = [];
+            var privileged = obj.event == 'add_admin' ? 0 : 1;
+            var shenfen = privileged == 0 ? '普通管理员' : '超级管理员';
+            //挑选出选择的id
+            data.forEach((item) => {
+              userids.push(item.userid);
+            });
+            if (data.length > 0) {
+              layer.confirm('确定将这' + data.length + '名用户设为' + shenfen + '？', function (index) {
+                $.ajax({
+                  url: location.href.split("meeting")[0] + "meeting/admin/batch/add",
+                  type: "POST",
+                  traditional: true,
+                  data: {
+                    userids: userids.map(String),
+                    privileged: privileged
+                  },
+                  success: function (data) {
+                    if (data.errcode === 0) {
+                      layer.close(index);
+                      setTimeout(function () {
+                        location.reload();
+                      }, 1000)
+                    }
+                    layui.use('layer', function () {
+                      var layer = layui.layer;
+                      layer.msg(data.errmsg);
+                    });
+                  }
+                });
+                layer.close(index);
+              });
+            }
+            break;
+          case 'refresh':
+            location.reload();
+            break;
+        };
+      });
+      //排序监听
+      table.on('sort(user_table)', function (obj) {
+        table.reload('user_table', {
+          initSort: obj
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>会议室详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <script src="../static/js/jquery-3.4.1.js" th:src="@{/js/jquery-3.4.1.js}"></script>
+    <script src="../static/js/vue.js" th:src="@{/js/vue.js}"></script>
+    <script src="../static/js/weui.min.js" th:src="@{/js/weui.min.js}"></script>
+    <script src="../static/js/semantic.min.js" th:src="@{/js/semantic.min.js}"></script>
+    <script src="../static/js/dialog.js" th:src="@{/js/dialog.js}"></script>
+    <script src="../static/js/room.js" th:src="@{/js/room.js}"></script>
+    <link rel="stylesheet" href="../static/css/weui.min.css" th:href="@{/css/weui.min.css}">
+    <link rel="stylesheet" href="../static/css/semantic.min.css" th:href="@{/css/semantic.min.css}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        table td,
+        table th {
+            border: 1px solid #cad9ea;
+            color: #666;
+            height: 30px;
+            min-width: 50%;
+        }
+
+        table thead th {
+            background-color: #CCE8EB;
+            width: 100px;
+        }
+
+        table tr:nth-child(odd) {
+            background: #fff;
+        }
+
+        table tr:nth-child(even) {
+            background: #F5FAFA;
+        }
+
+        #periods_container {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <p id="date" th:text="${date}" style="display: none">0</p>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>房间id</p>
+        </div>
+        <div id="roomId" class="weui-cell__ft" th:text="${room.roomId}">房间id</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>地点</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${room.place}">地点</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>可容纳人数</p>
+        </div>
+        <div class="weui-cell__ft" th:text="${room.size}">999</div>
+    </div>
+    <div class="weui-cell ">
+        <div class="weui-cell__bd">
+            <p>是否开放</p>
+        </div>
+        <div class="weui-cell__ft" th:if="${room.available}==1">是</div>
+        <div class="weui-cell__ft" th:if="${room.available}==0">否</div>
+    </div>
+    <div id="periods_container">
+        <div class="ui top attached tabular menu">
+            <a id="that" class="item active" data-tab="first"
+                style="display:inline-block;width: 50%;text-align: center">当日预约</a>
+            <a id="all" class="item" data-tab="second"
+                style="display:inline-block;width: 50%;text-align: center">所有预约</a>
+        </div>
+        <div class="ui bottom attached tab segment active" data-tab="first">
+            <table id="that_table" class="ui celled" style="display: none">
+                <thead>
+                    <tr>
+                        <th>开始时间</th>
+                        <th>占用时长</th>
+                    </tr>
+                </thead>
+                <tbody id="that_periods">
+                    <tr v-for="item in that">
+                        <td>{{item.startTime}}</td>
+                        <td>{{item.duration}}分钟</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="empty_tip" style="text-align: center">
+                <img src="../static/images/emp.png" th:src="@{/images/emp.png}" alt="">
+                <p>当日暂无预约记录</p>
+            </div>
+        </div>
+        <div class="ui bottom attached tab segment" data-tab="second">
+            <table id="all_table" class="ui celled" style="display: none">
+                <thead>
+                    <tr>
+                        <th>开始时间</th>
+                        <th>占用时长</th>
+                    </tr>
+                </thead>
+                <tbody id="all_periods">
+                    <tr v-for="item in all">
+                        <td>{{item.startTime}}</td>
+                        <td>{{item.duration}}分钟</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="empty_tip" style="text-align: center">
+                <img src="../static/images/emp.png" th:src="@{/images/emp.png}" alt="">
+                <p>会议室完全空闲</p>
+            </div>
+        </div>
+    </div>
+    <div style="margin: 0 auto;text-align: center;width: 100%;position: fixed;bottom: 0;">
+        <a id="appoint" class="ui primary button" style="margin: 0;margin-bottom: 20px;" href="#">
+            点击预约
+        </a>
+    </div>
+</body>
+
+</html>

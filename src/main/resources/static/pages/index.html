@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>会议室预约</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <script src="../js/jquery-3.4.1.js"></script>
+    <script src="../js/vue.js"></script>
+    <script src="../js/weui.min.js"></script>
+    <script src="../js/semantic.min.js"></script>
+    <script src="../js/calendar.min.js"></script>
+    <script src="../js/dialog.js"></script>
+    <script src="../js/index.js"></script>
+    <link rel="stylesheet" href="../css/weui.min.css">
+    <link rel="stylesheet" href="../css/semantic.min.css">
+    <link rel="stylesheet" href="../css/calendar.min.css">
+    <style>
+        body {
+            line-height: 1.6;
+            margin: 0;
+            position: relative;
+        }
+
+        .ui.selection.dropdown .menu {
+            max-height: 35rem;
+        }
+
+        #search_container {
+            margin: 15px 15px;
+            text-align: left;
+            right: 0;
+            border: 1px solid rgb(235, 238, 245);
+            border-radius: 5px;
+            border-image-source: initial;
+            border-image-slice: initial;
+            border-image-repeat: initial;
+        }
+
+        #search_result {
+            margin: 0 15px;
+            border: 1px solid rgb(235, 238, 245);
+            border-radius: 5px;
+        }
+
+        #result_tip {
+            margin: 0 15px 15px;
+        }
+
+        ul {
+            width: min-content;
+        }
+
+        ul li {
+            margin: 10px;
+            list-style-type: none;
+        }
+
+        #place {
+            line-height: 1em;
+            font-size: 1em;
+            opacity: 0.75;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<!--筛选容器-->
+<div id="search_container">
+    <ul>
+        <li>
+            <a class="ui label">
+                <i class="home icon"></i>会场地点
+            </a>
+        </li>
+        <li>
+            <div id="room_selector">
+                <select v-model="selected" class="ui dropdown" style="min-width: 86em">
+                    <option value="0">全部地点（默认）</option>
+                    <option v-for="item in list" :value="item.roomId">{{item.place}}</option>
+                </select>
+            </div>
+        </li>
+        <li>
+            <a class="ui label">
+                <i class="calendar check outline icon"></i>占用日期
+            </a>
+        </li>
+        <li>
+            <div id="date" class="ui calendar">
+                <div class="ui input">
+                    <input id="date_input" type="text" placeholder="选择占用日期（必选）">
+                </div>
+            </div>
+        </li>
+        <li>
+            <div id="date_tip" class="ui pointing red basic label" style="margin-top: 0;display: none">
+                占用日期不能为空
+            </div>
+        </li>
+        <li>
+            <a class="ui label">
+                <i class="calendar clock outline icon"></i>开始时间
+            </a>
+        </li>
+        <li>
+            <div id="time" class="ui calendar">
+                <div class="ui input">
+                    <input type="text" placeholder="选择开始时间（非必选）">
+                </div>
+            </div>
+        </li>
+        <li>
+            <a class="ui label">
+                <i class="hourglass start icon"></i>占用时长
+            </a>
+        </li>
+        <li>
+            <div class="ui input">
+                <input id="duration" type="number" placeholder="占用时长（分钟,必选）">
+            </div>
+        </li>
+        <li>
+            <div id="duration_tip" class="ui pointing red basic label" style="margin-top: 0;display: none">
+                占用时间不能为空
+            </div>
+        </li>
+        <li>
+            <a class="ui label">
+                <i class="users icon"></i>容纳人数
+            </a>
+        </li>
+        <li>
+            <div class="ui input">
+                <input id="size" type="number" placeholder="至少容纳人数（非必选）">
+            </div>
+        </li>
+        <li>
+            <button id="search_rooms" class="ui primary button">筛选会议室</button>
+        </li>
+    </ul>
+</div>
+<a id="result_tip" class="ui label" style="display: none">
+    <i class="telegram plane icon middle"></i>
+    查询到以下会议室：
+</a>
+<!--查询结果-->
+<div id="search_result" class="weui-cells" v-if="rooms.length>0">
+    <a class="weui-cell  weui-cell_access weui-cell_example" v-for="room in rooms"
+       :href="'/meeting/room/'+room.roomId+'/'+date">
+        <div class="weui-cell__hd">
+            <i class="home icon" style="opacity: 0.75"></i>
+        </div>
+        <div class="weui-cell__bd">
+            <p id="place">{{room.place}}</p>
+        </div>
+    </a>
+</div>
+<!--底部Tabbar-->
+<div id="tabbar" class="weui-tabbar" style="position: fixed;right: 0;bottom: 0;left: 0;z-index: 2000">
+    <a href="index.html" class="weui-tabbar__item  weui-bar__item_on">
+            <span style="display: inline-block; position: relative;">
+                <img src="../images/appointment_on.png" alt="" class="weui-tabbar__icon">
+            </span>
+        <p class="weui-tabbar__label" style="color: #4378BE;">会议室预约</p>
+    </a>
+    <a href="my.html" class="weui-tabbar__item">
+            <span style="display: inline-block; position: relative;">
+                <img src="../images/my.png" alt="" class="weui-tabbar__icon">
+            </span>
+        <p class="weui-tabbar__label">我</p>
+    </a>
+</div>
+<!--弹窗-->
+<div id="dialogs">
+    <!--确认弹窗-->
+    <div id="confirm" class="js_dialog" style="opacity: 100; display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div id="confirm_msg" class="weui-dialog__bd">确定信息</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+    <!--选择弹窗-->
+    <div id="yesorno" class="js_dialog" style="opacity: 100; display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong id="yesorno_title" class="weui-dialog__title">标题</strong></div>
+            <div id="yesorno_msg" class="weui-dialog__bd">内容</div>
+            <div class="weui-dialog__ft">
+                <a id="no_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                <a id="yes_btn" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--完成气泡-->
+<div id="complete" style="opacity: 100; display: none;">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+        <p id="complete_msg" class="weui-toast__content">已完成</p>
+    </div>
+</div>
+<!--加载中气泡-->
+<div id="loading" style="opacity: 100; display: none">
+    <div class="weui-mask_transparent"></div>
+    <div class="weui-toast">
+        <i class="weui-loading weui-icon_toast"></i>
+        <p id="loading_msg" class="weui-toast__content">数据加载中</p>
+    </div>
+</div>
+</body>
+
+</html>
